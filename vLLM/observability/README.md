@@ -2,19 +2,19 @@
 
 **Monitor, trace, and optimize Large Language Model (LLM) deployments** using [vLLM](https://github.com/vllm-project/vllm) with full observability powered by **OpenTelemetry**, **Jaeger**, **Prometheus**, and **Grafana** — all containerized and easy to launch with Docker Compose.
 
-> 🔍 Gain visibility into token usage, latency, throughput, and system-level behavior across your LLM pipeline — all with zero friction.
+> Gain visibility into token usage, latency, throughput, and system-level behavior across your LLM pipeline — all with zero friction.
 
 ---
 
 ## Features
 
-* ⚡ **vLLM Inference** (`facebook/opt-125m` small good for testing)
-* 🔬 **RAG-style FastAPI App** with Prometheus metrics and Jaeger tracing
-* 📈 **Prometheus** for metrics collection
-* 🧭 **Jaeger** for distributed tracing
-* 📊 **Grafana** dashboards pre-configured
-* 🛠️ Docker Compose for one-command deployment
-* 🔗 OpenTelemetry-based instrumentation
+* **vLLM Inference** (`facebook/opt-125m` small good for testing)
+* **RAG-style FastAPI App** with Prometheus metrics and Jaeger tracing
+* **Prometheus** for metrics collection
+* **Jaeger** for distributed tracing
+* **Grafana** dashboards pre-configured
+* Docker Compose for one-command deployment
+* OpenTelemetry-based instrumentation
 
 ---
 
@@ -66,7 +66,7 @@
 
 ### Launch the Stack
 
-```bash
+```sh
 git clone git@github.com:hitalukder/mlops.git
 cd mlops/vLLM/observability
 docker compose up -d
@@ -97,6 +97,15 @@ Each service and component is visualized as a **trace span** in Jaeger, providin
 -> Grafana dashboard, showing vLLM server metrics
 
 ![alt text](images/metrics.png)
+
+---
+
+### Stop the services
+
+```sh
+docker compose down --volumes
+```
+
 ---
 
 ## Best Practices for Production
