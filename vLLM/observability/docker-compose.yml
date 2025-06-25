@@ -1,0 +1,85 @@
+services:
+  ## Mocked RAG application (embedding + vector search mocked)
+  rag-app:
+    build:
+      context: rag-app  # Builds the image using Dockerfile from the rag-app directory
+    container_name: rag-app
+    ports:
+      - "8002:8002"  # FastAPI main API endpoint
+      - "8001:8001"  # Prometheus metrics endpoint
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=grpc://jaeger:4317  # Send traces to Jaeger
+    depends_on:
+      - jaeger
+      - prometheus
+
+  ## vLLM server for LLM inference
+  vllm-server:
+    build: vllm-server  # Builds the image from the vllm-server directory
+    container_name: vllm-server
+    ports:
+      - "8000:8000"  # vLLM inference API port
+    environment:
+      - MODEL_NAME=facebook/opt-125m  # Name of the model to serve
+      - OTEL_SERVICE_NAME=vllm-server  # Service name used in tracing
+      - NVIDIA_VISIBLE_DEVICES=all  # Make all GPUs visible to the container
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility  # Required for GPU compute workloads
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=grpc://jaeger:4317  # Send traces to Jaeger
+      - OTEL_EXPORTER_OTLP_TRACES_INSECURE=true  # Allow insecure (non-TLS) trace export
+      - VLLM_LOGGING_LEVEL=DEBUG  # Set logging level
+    command: vllm serve facebook/opt-125m --otlp-traces-endpoint=grpc://jaeger:4317  # Start vLLM server
+    depends_on:
+      - jaeger
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia  # Use the NVIDIA runtime
+              count: all      # Use all available GPUs
+              capabilities: [gpu]  # Request GPU capability
+
+  ## Jaeger: distributed tracing backend
+  jaeger:
+    image: jaegertracing/all-in-one:1.57  # Jaeger all-in-one image
+    container_name: jaeger
+    ports:
+      - "16686:16686"   # Jaeger UI
+      - "4317:4317"     # OTLP gRPC endpoint
+      - "4318:4318"     # OTLP HTTP endpoint
+      - "6831:6831/udp" # Jaeger agent UDP port
+      - "6832:6832/udp"
+      - "14250:14250"
+      - "14268:14268"
+      - "14269:14269"
+      - "5778:5778"
+      - "9411:9411"     # Zipkin compatible port
+
+  ## Prometheus: metrics collector
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml  # Mount custom config
+    ports:
+      - "9090:9090"  # Prometheus UI and API
+
+  ## Grafana: metrics dashboard and visualization
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"  # Grafana dashboard UI
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin  # Default admin username
+      - GF_SECURITY_ADMIN_PASSWORD=admin  # Default admin password
+    volumes:
+      - grafana-storage:/var/lib/grafana  # Persist Grafana data
+      - ./grafana/dashboards:/var/lib/grafana/dashboards  # Mount custom dashboards
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards  # Auto-provision dashboards
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources  # Auto-provision data sources
+    depends_on:
+      - prometheus
+      - jaeger
+
+volumes:
+  grafana-storage:  # Named volume for persistent Grafana data

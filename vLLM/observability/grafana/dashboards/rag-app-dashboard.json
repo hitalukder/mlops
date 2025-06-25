@@ -1,0 +1,111 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "id": null,
+  "title": "RAG Application Dashboard",
+  "uid": "rag-dashboard",
+  "version": 2,
+  "schemaVersion": 37,
+  "style": "dark",
+  "tags": ["rag", "metrics"],
+  "timezone": "",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 1,
+      "panels": [],
+      "title": "RAG Application Metrics",
+      "type": "row"
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "RAG App Request Rate",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 1 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "rate(http_requests_total{job=\"rag-app\"}[5m])",
+          "legendFormat": "{{method}} {{handler}}"
+        },
+        {
+          "refId": "B",
+          "expr": "rate(fastapi_requests_total{job=\"rag-app\"}[5m])",
+          "legendFormat": "{{method}} {{path_template}}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "RAG App Response Time",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 1 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"rag-app\"}[5m]))",
+          "legendFormat": "95th percentile"
+        },
+        {
+          "refId": "B",
+          "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job=\"rag-app\"}[5m]))",
+          "legendFormat": "50th percentile"
+        },
+        {
+          "refId": "C",
+          "expr": "rate(http_request_duration_seconds_sum{job=\"rag-app\"}[5m]) / rate(http_request_duration_seconds_count{job=\"rag-app\"}[5m])",
+          "legendFormat": "Average"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "RAG App Error Rate",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 9 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "rate(http_requests_total{job=\"rag-app\",status_code!~\"2..\"}[5m]) / rate(http_requests_total{job=\"rag-app\"}[5m]) * 100",
+          "legendFormat": "Error Rate %"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "RAG App Resource Usage",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 9 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "process_resident_memory_bytes{job=\"rag-app\"}",
+          "legendFormat": "Memory Usage"
+        },
+        {
+          "refId": "B",
+          "expr": "rate(process_cpu_seconds_total{job=\"rag-app\"}[5m]) * 100",
+          "legendFormat": "CPU Usage %"
+        }
+      ]
+    }
+  ]
+}
