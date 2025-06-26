@@ -4,6 +4,8 @@
 
 > Gain visibility into token usage, latency, throughput, and system-level behavior across your LLM pipeline — all with zero friction.
 
+I have written a blog about vLLM observablity, you can follow it [here](https://medium.com/@himadricuet/a2f4924d3949)
+
 ---
 
 ## Features
