@@ -1,7 +1,6 @@
 
 ![image](https://github.com/user-attachments/assets/08442724-0391-4ce7-800c-c5e999fa1bcf)
 
-
 **vLLM** is a high-performance, user-friendly library for serving and running inference on large language models (LLMs).
 
 Originally built by the **Sky Computing Lab at UC Berkeley**
@@ -40,7 +39,7 @@ You can deploy an LLM using the **vLLM** library in several ways, depending on y
 
 ---
 
-### 🧠 1. **Standalone Server (OpenAI-Compatible REST API)**
+### 1. **Standalone Server (OpenAI-Compatible REST API)**
 
 Run the vLLM model server with a simple CLI command, exposing an OpenAI-compatible server.
 
@@ -51,7 +50,6 @@ vllm serve Qwen/Qwen2.5-1.5B-Instruct
 ```sh
 curl http://localhost:8000/v1/models
 ```
-
 ---
 
 ### 2. **Dockerized Deployment**
